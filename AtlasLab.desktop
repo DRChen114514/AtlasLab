@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=AtlasLab 文档智能
+Comment=配置 DeepSeek API，拖拽上传赛题 PDF（自动转 MD），管理数据附件
+Icon=document-properties
+ Exec=/usr/bin/python3 /home/violet/Workspace/Code/Project/AtlasLab/AtlasLab.py
+ Path=/home/violet/Workspace/Code/Project/AtlasLab
+Terminal=false
+Categories=Science;Education;
+StartupNotify=true

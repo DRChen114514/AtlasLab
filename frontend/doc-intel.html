@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AtlasLab · 文档智能 & 赛题配置</title>
+<style>
+:root {
+  --ink: #13233a; --ink-strong: #081b33; --ink-soft: #40516a;
+  --muted: #738198; --line: #e1e7ef; --line-strong: #cad5e2;
+  --paper: #f4f6f9; --white: #ffffff;
+  --gold: #f5b942; --gold-strong: #e8a91e; --gold-soft: #fff4d6;
+  --blue: #2468a2; --blue-soft: #edf5ff;
+  --teal: #168f82; --teal-soft: #e8f8f5;
+  --green: #23875d; --green-soft: #e9f7f0;
+  --rose: #c84f6a; --rose-soft: #fff0f3;
+  --shadow-sm: 0 1px 2px rgba(8,27,51,0.04), 0 8px 24px rgba(8,27,51,0.05);
+  --shadow-md: 0 18px 48px rgba(8,27,51,0.09);
+  --radius-sm: 10px; --radius-md: 16px;
+  font-family: Inter, "SF Pro Display", "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; }
+body {
+  color: var(--ink); min-height: 100vh;
+  background: radial-gradient(circle at 87% 2%, rgba(36,104,162,0.08), transparent 24rem),
+              radial-gradient(circle at 18% 100%, rgba(245,185,66,0.10), transparent 28rem),
+              var(--paper);
+}
+button, input, textarea, select { font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: 0.55; }
+.app { max-width: 1200px; margin: 0 auto; padding: 24px 32px; }
+.header { display: flex; align-items: center; gap: 16px; padding: 20px 0 32px; border-bottom: 1px solid var(--line); }
+.header h1 { font-size: 22px; font-weight: 700; color: var(--ink-strong); }
+.header small { font-size: 13px; color: var(--muted); display: block; }
+.page-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px; }
+.panel { background: var(--white); border-radius: var(--radius-md); border: 1px solid var(--line); box-shadow: var(--shadow-sm); padding: 24px; }
+.panel.full { grid-column: 1 / -1; }
+.panel-head .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; }
+.panel-head h2 { font-size: 17px; font-weight: 700; color: var(--ink-strong); margin-top: 2px; }
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.field span { font-size: 13px; font-weight: 600; color: var(--ink-soft); }
+.field input, .field textarea { padding: 10px 14px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); font-size: 14px; background: var(--paper); }
+.field input:focus, .field textarea:focus { border-color: var(--blue); outline: none; }
+.field-hint { font-size: 12px; color: var(--muted); }
+.secret-field { display: flex; gap: 8px; }
+.secret-field input { flex: 1; }
+.primary-btn { padding: 10px 20px; border: none; border-radius: var(--radius-sm); background: var(--blue); color: white; font-size: 14px; font-weight: 600; }
+.primary-btn:hover { background: #1d5a8c; }
+.ghost-btn { padding: 10px 20px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--white); color: var(--ink-soft); font-size: 14px; font-weight: 600; }
+.ghost-btn:hover { background: var(--paper); }
+.status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.status-badge.connected { background: var(--green-soft); color: var(--green); }
+.status-badge.disconnected { background: var(--rose-soft); color: var(--rose); }
+.status-badge.pending { background: var(--gold-soft); color: var(--gold-strong); }
+.upload-zone { border: 2px dashed var(--line-strong); border-radius: var(--radius-md); padding: 32px 24px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--paper); margin-bottom: 12px; }
+.upload-zone:hover, .upload-zone.drag-over { border-color: var(--blue); background: var(--blue-soft); box-shadow: 0 0 0 4px rgba(36,104,162,0.08); }
+.upload-zone.drag-over { border-style: solid; }
+.upload-icon { font-size: 36px; margin-bottom: 8px; }
+.upload-zone strong { display: block; font-size: 14px; color: var(--ink-strong); margin-bottom: 4px; }
+.upload-zone span { font-size: 12px; color: var(--muted); display: block; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); }
+.file-list { margin-top: 12px; }
+.file-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border-radius: var(--radius-sm); background: var(--paper); border: 1px solid var(--line); margin-bottom: 6px; }
+.file-item .name { font-size: 13px; font-weight: 600; color: var(--ink-strong); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-item .meta { font-size: 11px; color: var(--muted); }
+.file-item .remove-btn { background: none; border: none; color: var(--rose); font-size: 18px; cursor: pointer; padding: 2px 6px; }
+.result-box { min-height: 200px; max-height: 500px; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 16px; background: var(--paper); font-size: 13px; }
+.result-box h4 { font-size: 14px; margin: 12px 0 6px; color: var(--ink-strong); }
+.result-box h4:first-child { margin-top: 0; }
+.result-box ul { padding-left: 20px; }
+.result-box li { margin-bottom: 4px; color: var(--ink-soft); }
+.result-box .formula-ref { color: var(--teal); font-weight: 600; }
+.result-box .section-ref { color: var(--blue); font-weight: 600; }
+.result-box .metric-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+.result-box .metric-item { padding: 8px 14px; background: var(--white); border-radius: var(--radius-sm); border: 1px solid var(--line); font-size: 12px; }
+.empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+.empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state strong { display: block; font-size: 15px; color: var(--ink-soft); margin-bottom: 4px; }
+.empty-state p { font-size: 13px; }
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); padding: 10px 24px; background: var(--ink-strong); color: white; border-radius: 20px; font-size: 13px; font-weight: 600; z-index: 100; opacity: 0; transition: opacity 0.25s; pointer-events: none; }
+.toast.show { opacity: 1; }
+.footer-bar { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); }
+@media (max-width: 768px) { .app { padding: 16px; } .page-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="app">
+
+<header class="header">
+  <span style="font-size:36px;">🏔️</span>
+  <div>
+    <h1>AtlasLab · 文档智能与赛题配置</h1>
+    <small>配置 DeepSeek API，拖拽上传赛题 PDF（自动转 Markdown）与数据附件</small>
+  </div>
+</header>
+
+<div class="page-grid">
+
+<!-- ===== DeepSeek API 配置 ===== -->
+<section class="panel">
+  <div class="panel-head">
+    <p class="eyebrow">API Configuration</p>
+    <h2>DeepSeek API 密钥</h2>
+  </div>
+  <label class="field">
+    <span>API Base URL</span>
+    <input id="deepseekBase" value="https://api.deepseek.com/v1" />
+    <span class="field-hint">DeepSeek 兼容 OpenAI 格式的端点</span>
+  </label>
+  <label class="field">
+    <span>API Key</span>
+    <div class="secret-field">
+      <input id="deepseekKey" type="password" autocomplete="off" placeholder="sk-..." />
+      <button class="ghost-btn" type="button" onclick="toggleVisible('deepseekKey')">👁</button>
+    </div>
+  </label>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span id="deepseekStatus" class="status-badge pending">⏳ 待验证</span>
+    <button class="ghost-btn" type="button" onclick="testDeepSeek()" style="font-size:12px;padding:6px 14px;">🔍 测试连接</button>
+  </div>
+</section>
+
+<!-- ===== 赛题 PDF 上传 ===== -->
+<section class="panel">
+  <div class="panel-head">
+    <p class="eyebrow">Problem PDF</p>
+    <h2>拖入赛题 PDF（自动转 MD）</h2>
+  </div>
+  <input class="visually-hidden" id="pdfFile" type="file" accept=".pdf,.docx,.html,.md,.txt,.tex" multiple />
+  <div class="upload-zone" tabindex="0" role="button" id="uploadZone">
+    <div class="upload-icon">📄</div>
+    <strong>拖入赛题 PDF 或文档到此处</strong>
+    <span>支持 .pdf .docx .html .md .txt .tex · 自动解析结构</span>
+  </div>
+  <div class="file-list" id="pdfFileList"></div>
+  <div style="margin-top:14px;">
+    <label class="field">
+      <span>赛题标题</span>
+      <input id="problemTitle" placeholder="例：城市应急物资调度优化" />
+    </label>
+    <label class="field">
+      <span>背景与目标</span>
+      <textarea id="problemBrief" rows="6" placeholder="粘贴赛题背景、问题与输出要求…（PDF 自动填入）"></textarea>
+    </label>
+  </div>
+</section>
+
+<!-- ===== 数据附件 ===== -->
+<section class="panel full">
+  <div class="panel-head">
+    <p class="eyebrow">Data Attachments</p>
+    <h2>赛题数据附件</h2>
+  </div>
+  <input class="visually-hidden" id="attFile" type="file" accept=".xlsx,.xls,.csv,.pdf,.docx,.txt,.md,.json" multiple />
+  <div class="upload-zone" tabindex="0" role="button" id="attZone">
+    <div class="upload-icon">📎</div>
+    <strong>拖入数据附件（Excel / CSV / PDF 等）</strong>
+    <span>支持 .xlsx .xls .csv .pdf .docx .txt .json · 可多选</span>
+  </div>
+  <div class="file-list" id="attFileList"></div>
+</section>
+
+<!-- ===== 解析结果 ===== -->
+<section class="panel full">
+  <div class="panel-head">
+    <p class="eyebrow">Parse Result</p>
+    <h2>文档解析结果</h2>
+    <span class="status-badge connected" id="parseStatusBadge" style="margin-left:12px;">就绪</span>
+  </div>
+  <div class="result-box" id="resultBox">
+    <div class="empty-state">
+      <div class="icon">📋</div>
+      <strong>上传文档后显示解析结果</strong>
+      <p>PDF 自动转为 Markdown，提取文本结构与关键信息</p>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<div class="footer-bar">
+  <button class="ghost-btn" type="button" onclick="resetAll()">🔄 全部清空</button>
+  <button class="ghost-btn" type="button" onclick="saveConfig()">💾 保存配置</button>
+  <button class="primary-btn" type="button" id="runBtn" onclick="runPipeline()">🚀 启动建模流水线</button>
+</div>
+
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+// ===== 全局状态 =====
+var uploadedPdfs = [];
+var uploadedAtts = [];
+
+// ===== Toast =====
+var toastTimer;
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2400);
+}
+
+function toggleVisible(id) {
+  var el = document.getElementById(id);
+  el.type = el.type === 'password' ? 'text' : 'password';
+}
+
+function esc(s) { return String(s||'').replace(/[<>&"']/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function formatSize(b) { return b<1024 ? b+' B' : b<1048576 ? (b/1024).toFixed(1)+' KB' : (b/1048576).toFixed(1)+' MB'; }
+
+// ===== 文件列表渲染 =====
+function renderFileList(listId) {
+  var list = document.getElementById(listId);
+  var items = listId === 'pdfFileList' ? uploadedPdfs : uploadedAtts;
+  list.innerHTML = items.map(function(f, i){
+    return '<div class="file-item"><span class="name">'+esc(f.name)+'</span><span class="meta">'+formatSize(f.size)+'</span><button class="remove-btn" onclick="removeFile(\''+listId+'\','+i+')">×</button></div>';
+  }).join('');
+  updateRunBtn();
+}
+
+function removeFile(listId, idx) {
+  if (listId === 'pdfFileList') uploadedPdfs.splice(idx, 1);
+  else uploadedAtts.splice(idx, 1);
+  renderFileList(listId);
+}
+
+// ===== 拖拽上传 =====
+function setupDropZone(zoneId, inputId, listId) {
+  var zone = document.getElementById(zoneId);
+  var input = document.getElementById(inputId);
+  zone.addEventListener('click', function(){ input.click(); });
+  zone.addEventListener('dragover', function(e){ e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', function(){ zone.classList.remove('drag-over'); });
+  zone.addEventListener('drop', function(e){
+    e.preventDefault(); zone.classList.remove('drag-over');
+    handleFiles(e.dataTransfer.files, listId);
+  });
+  input.addEventListener('change', function(e){ handleFiles(e.target.files, listId); input.value = ''; });
+}
+
+function handleFiles(files, listId) {
+  for (var i = 0; i < files.length; i++) {
+    var f = files[i];
+    if (f.size > 50 * 1024 * 1024) { showToast('文件过大 (>50MB): ' + f.name); continue; }
+    var item = { id: 'f-'+Date.now()+'-'+Math.random().toString(36).slice(2,6), name: f.name, size: f.size, type: f.type, file: f };
+    if (listId === 'pdfFileList') {
+      uploadedPdfs.push(item);
+      if (f.name.toLowerCase().endsWith('.pdf')) { convertPdfToMd(f, item); }
+      else { readPdfText(f); }
+    } else {
+      uploadedAtts.push(item);
+    }
+    renderFileList(listId);
+  }
+}
+
+// ===== PDF -> MD 转换 =====
+function convertPdfToMd(file, item) {
+  var badge = document.getElementById('parseStatusBadge');
+  badge.textContent = '转换中…'; badge.className = 'status-badge pending';
+  var formData = new FormData();
+  formData.append('file', file);
+  fetch('/api/convert-pdf', { method: 'POST', body: formData })
+    .then(function(r){
+      if (!r.ok) throw new Error('HTTP '+r.status);
+      return r.json();
+    })
+    .then(function(data){
+      item.mdText = data.markdown || data.text || '';
+      item.pageCount = data.page_count || 0;
+      badge.textContent = '已转换'; badge.className = 'status-badge connected';
+      showToast('PDF 已转为 Markdown (' + item.pageCount + ' 页, ' + item.mdText.length + ' 字符)');
+      var brief = document.getElementById('problemBrief');
+      if (!brief.value.trim() && item.mdText) { brief.value = item.mdText.slice(0, 3000); }
+      parseDocumentStructure(item.mdText);
+    })
+    .catch(function(e){
+      badge.textContent = '回退模式'; badge.className = 'status-badge disconnected';
+      showToast('后端转换失败，使用浏览器端提取');
+      readPdfText(file);
+    });
+}
+
+function readPdfText(file) {
+  var reader = new FileReader();
+  reader.onload = function(){
+    var text = new TextDecoder().decode(new Uint8Array(reader.result).slice(0, 5000));
+    var excerpt = text.replace(/[^\x20-\x7E\u4e00-\u9fff\n]/g, '').slice(0, 2000);
+    if (excerpt.length > 100) {
+      var brief = document.getElementById('problemBrief');
+      if (!brief.value.trim()) { brief.value = excerpt; }
+      parseDocumentStructure(excerpt);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ===== 文档结构分析 =====
+function parseDocumentStructure(text) {
+  if (!text || text.length < 50) return;
+  var box = document.getElementById('resultBox');
+  var headings = (text.match(/^#{1,6}\s+.+$/gm) || []);
+  var formulas = (text.match(/\$[^$]+\$|\$\$[^$]+\$\$/g) || []);
+  var tables = (text.match(/\|.+\|/g) || []);
+  var images = (text.match(/!\[[^\]]*\]\([^)]+\)/g) || []);
+  var lines = text.split('\n'), sections = [], currentH1 = '', currentH2 = '';
+  for (var i = 0; i < lines.length; i++) {
+    if (/^#\s/.test(lines[i])) { currentH1 = lines[i].replace(/^#\s*/, ''); currentH2 = ''; }
+    else if (/^##\s/.test(lines[i])) { currentH2 = lines[i].replace(/^##\s*/, ''); }
+    else if (/^###\s/.test(lines[i])) { sections.push({ h1: currentH1, h2: currentH2, h3: lines[i].replace(/^###\s*/, '') }); }
+  }
+  box.innerHTML =
+    '<div class="metric-row">' +
+    '<div class="metric-item"><strong>'+lines.length+'</strong> 行</div>' +
+    '<div class="metric-item"><strong>'+text.length+'</strong> 字符</div>' +
+    '<div class="metric-item"><strong>'+headings.length+'</strong> 标题</div>' +
+    '<div class="metric-item"><strong>'+formulas.length+'</strong> 公式</div>' +
+    '<div class="metric-item"><strong>'+tables.length+'</strong> 表格行</div>' +
+    '<div class="metric-item"><strong>'+images.length+'</strong> 图片引用</div>' +
+    '</div>' +
+    (headings.length ? '<h4>📑 文档结构</h4>'+headings.slice(0,20).map(function(h){return '<span class="section-ref">'+esc(h)+'</span>';}).join('<br>') : '') +
+    (formulas.length ? '<h4>📐 检测到公式</h4>'+formulas.slice(0,10).map(function(f){return '<span class="formula-ref"><code>'+esc(f.slice(0,80))+'</code></span>';}).join('<br>') : '') +
+    (sections.length ? '<h4>📋 小节</h4><ul>'+sections.slice(0,15).map(function(s){return '<li>'+esc(s.h1)+' → '+esc(s.h2)+' → <strong>'+esc(s.h3)+'</strong></li>';}).join('')+'</ul>' : '');
+}
+
+// ===== DeepSeek 测试 =====
+function testDeepSeek() {
+  var status = document.getElementById('deepseekStatus');
+  status.textContent = '⏳ 测试中…'; status.className = 'status-badge pending';
+  var base = document.getElementById('deepseekBase').value.trim();
+  var key = document.getElementById('deepseekKey').value.trim();
+  if (!base) { status.textContent = '✗ 未填写 URL'; status.className = 'status-badge disconnected'; return; }
+  var headers = { 'Content-Type': 'application/json' };
+  if (key) { headers['Authorization'] = 'Bearer ' + key; }
+  fetch(base.replace(/\/+$/, '') + '/models', { headers: headers })
+    .then(function(r){
+      if (r.ok) { status.textContent = '✓ 已连接'; status.className = 'status-badge connected'; showToast('DeepSeek API 连接成功'); }
+      else { status.textContent = '✗ HTTP ' + r.status; status.className = 'status-badge disconnected'; }
+    })
+    .catch(function(e){ status.textContent = '✗ 不可达'; status.className = 'status-badge disconnected'; showToast('连接失败: ' + e.message); });
+}
+
+// ===== 配置持久化 =====
+function saveConfig() {
+  var cfg = {
+    deepseekBase: document.getElementById('deepseekBase').value,
+    deepseekKey: document.getElementById('deepseekKey').value,
+    problemTitle: document.getElementById('problemTitle').value,
+    problemBrief: document.getElementById('problemBrief').value
+  };
+  localStorage.setItem('atlaslab_v3_config', JSON.stringify(cfg));
+  showToast('配置已保存');
+}
+function loadConfig() {
+  try {
+    var raw = localStorage.getItem('atlaslab_v3_config');
+    if (!raw) return;
+    var cfg = JSON.parse(raw);
+    if (cfg.deepseekBase) document.getElementById('deepseekBase').value = cfg.deepseekBase;
+    if (cfg.deepseekKey) document.getElementById('deepseekKey').value = cfg.deepseekKey;
+    if (cfg.problemTitle) document.getElementById('problemTitle').value = cfg.problemTitle;
+    if (cfg.problemBrief) document.getElementById('problemBrief').value = cfg.problemBrief;
+  } catch(e) {}
+}
+
+// ===== 清空与启动 =====
+function resetAll() {
+  uploadedPdfs = []; uploadedAtts = [];
+  renderFileList('pdfFileList'); renderFileList('attFileList');
+  document.getElementById('problemTitle').value = '';
+  document.getElementById('problemBrief').value = '';
+  document.getElementById('resultBox').innerHTML = '<div class="empty-state"><div class="icon">📋</div><strong>上传文档后显示解析结果</strong><p>上传 PDF 自动转 Markdown，检测标题、章节与公式</p></div>';
+  document.getElementById('parseStatusBadge').textContent = '就绪';
+  document.getElementById('parseStatusBadge').className = 'status-badge connected';
+  updateRunBtn(); showToast('已清空');
+}
+function updateRunBtn() {
+  var hasTitle = !!document.getElementById('problemTitle').value.trim();
+  var btn = document.getElementById('runBtn');
+  btn.disabled = !hasTitle;
+  btn.textContent = hasTitle ? '🚀 启动建模流水线 ('+uploadedPdfs.length+' 文档, '+uploadedAtts.length+' 附件)' : '🚀 启动建模流水线（需填写赛题标题）';
+}
+['problemTitle','problemBrief'].forEach(function(id){
+  document.getElementById(id).addEventListener('input', updateRunBtn);
+});
+function runPipeline() {
+  if (!document.getElementById('problemTitle').value.trim()) { showToast('请先填写赛题标题'); return; }
+  saveConfig();
+  showToast('任务已就绪！共 ' + uploadedPdfs.length + ' 个文档 + ' + uploadedAtts.length + ' 个附件。PDF 将自动转为 MD 供 Agent 消费。');
+}
+
+// ===== 初始化 =====
+setupDropZone('uploadZone', 'pdfFile', 'pdfFileList');
+setupDropZone('attZone', 'attFile', 'attFileList');
+loadConfig();
+updateRunBtn();
+</script>
+</body>
+</html>
